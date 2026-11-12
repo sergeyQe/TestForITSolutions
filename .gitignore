@@ -1,5 +1,28 @@
-bin/
-obj/
-/packages/
+# Зависимости
+node_modules/
+
+# Сборка
+dist/
+*.tsbuildinfo
+
+# Сгенерированный клиент Prisma
+generated/
+
+# Файлы окружения (пример настроек хранится в репозитории)
+.env
+.env.*
+!.env.example
+
+# Тесты
+coverage/
+
+# Журналы
+*.log
+
+# IDE и система
+.idea/
+.vscode/
 riderModule.iml
 /_ReSharper.Caches/
+.DS_Store
+Thumbs.db

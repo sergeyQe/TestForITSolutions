@@ -19,12 +19,17 @@ registerEnumType(SkillCategory, {
 @ObjectType({ description: 'Навык: технология, инструмент или подход' })
 export class Skill {
   @Field({ description: 'Название навыка' })
-  name: string;
+  name: string; // название технологии, инструмента или подхода
 
   @Field(() => SkillCategory, { description: 'Категория навыка' })
-  category: SkillCategory;
+  category: SkillCategory; // группа навыка: перечисление из схемы базы
 }
 
+/**
+ * Преобразует навык из сервиса в модель GraphQL; служебный profileId наружу не уходит.
+ * @param skill - навык из сервиса
+ * @returns модель для ответа
+ */
 export function toSkillModel(skill: SkillData): Skill {
   return { name: skill.name, category: skill.category };
 }

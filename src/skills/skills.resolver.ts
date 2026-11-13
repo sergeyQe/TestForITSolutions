@@ -6,8 +6,16 @@ import { SkillsLoader } from './skills.loader.js';
 /** Поле Profile.skills объявляет модуль навыков, а не модуль профиля */
 @Resolver(() => Profile)
 export class SkillsResolver {
-  constructor(private readonly skillsLoader: SkillsLoader) {}
+  constructor(
+    private readonly skillsLoader: SkillsLoader, // загрузчик навыков
+  ) {}
 
+  /**
+   * Поле Profile.skills.
+   * @param profile - профиль-родитель; нужен только его id
+   * @param context - контекст запроса GraphQL, передаётся в загрузчик
+   * @returns навыки в порядке показа
+   */
   @ResolveField(() => [Skill], {
     description:
       'Навыки одним списком в порядке показа: навыки одной категории идут подряд',

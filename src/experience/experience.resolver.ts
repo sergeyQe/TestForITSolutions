@@ -7,8 +7,16 @@ import { Experience, toExperienceModel } from './models/experience.model.js';
 /** Поле Profile.experience объявляет модуль опыта, а не модуль профиля */
 @Resolver(() => Profile)
 export class ProfileExperienceResolver {
-  constructor(private readonly experienceLoader: ExperienceLoader) {}
+  constructor(
+    private readonly experienceLoader: ExperienceLoader, // загрузчики мест работы и достижений
+  ) {}
 
+  /**
+   * Поле Profile.experience.
+   * @param profile - профиль-родитель; нужен только его id
+   * @param context - контекст запроса GraphQL, передаётся в загрузчик
+   * @returns места работы в порядке показа
+   */
   @ResolveField(() => [Experience], {
     description: 'Опыт работы: от последнего места к первому',
   })
@@ -27,8 +35,16 @@ export class ProfileExperienceResolver {
 /** Вложенные поля самого места работы */
 @Resolver(() => Experience)
 export class ExperienceResolver {
-  constructor(private readonly experienceLoader: ExperienceLoader) {}
+  constructor(
+    private readonly experienceLoader: ExperienceLoader, // загрузчики мест работы и достижений
+  ) {}
 
+  /**
+   * Поле Experience.achievements.
+   * @param experience - место работы-родитель; нужен только его id
+   * @param context - контекст запроса GraphQL, передаётся в загрузчик
+   * @returns достижения в порядке показа; пустой список, если достижений нет
+   */
   @ResolveField(() => [Achievement], {
     description: 'Достижения на этом месте работы в порядке показа',
   })

@@ -34,28 +34,28 @@ enum SkillCategory {
 
 /// Профиль специалиста. В базе один: это гарантирует seed
 model Profile {
-  id          Int    @id @default(autoincrement())
-  name        String
-  description String
+  id          Int    @id @default(autoincrement()) // первичный ключ
+  name        String // ФИО одной строкой
+  description String // текст «о себе»
 
-  links       Link[]
-  skills      Skill[]
-  experiences Experience[]
-  projects    Project[]
+  links       Link[] // ссылки профиля
+  skills      Skill[] // навыки профиля
+  experiences Experience[] // места работы
+  projects    Project[] // проекты
 
   @@map("profiles")
 }
 
 /// Ссылка на профессиональный ресурс
 model Link {
-  id        Int      @id @default(autoincrement())
-  profileId Int      @map("profile_id")
-  type      LinkType
-  label     String
-  url       String
-  sortOrder Int      @map("sort_order")
+  id        Int      @id @default(autoincrement()) // первичный ключ
+  profileId Int      @map("profile_id") // профиль-владелец
+  type      LinkType // вид ссылки
+  label     String // подпись для показа
+  url       String // адрес: https://… или mailto:…
+  sortOrder Int      @map("sort_order") // порядок показа: меньше — выше
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade) // связь с профилем: строка удаляется вместе с ним
 
   @@index([profileId])
   @@map("links")
@@ -63,13 +63,13 @@ model Link {
 
 /// Навык
 model Skill {
-  id        Int           @id @default(autoincrement())
-  profileId Int           @map("profile_id")
-  name      String
-  category  SkillCategory
-  sortOrder Int           @map("sort_order")
+  id        Int           @id @default(autoincrement()) // первичный ключ
+  profileId Int           @map("profile_id") // профиль-владелец
+  name      String // название навыка
+  category  SkillCategory // категория навыка
+  sortOrder Int           @map("sort_order") // сквозной порядок показа: меньше — выше
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade) // связь с профилем: строка удаляется вместе с ним
 
   @@index([profileId])
   @@map("skills")
@@ -77,16 +77,16 @@ model Skill {
 
 /// Место работы. Даты — без времени, хранится первое число месяца; endDate = NULL — работает по настоящее время
 model Experience {
-  id        Int       @id @default(autoincrement())
-  profileId Int       @map("profile_id")
-  company   String
-  position  String
-  startDate DateTime  @map("start_date") @db.Date
-  endDate   DateTime? @map("end_date") @db.Date
-  sortOrder Int       @map("sort_order")
+  id        Int       @id @default(autoincrement()) // первичный ключ
+  profileId Int       @map("profile_id") // профиль-владелец
+  company   String // компания
+  position  String // должность
+  startDate DateTime  @map("start_date") @db.Date // начало работы: первое число месяца
+  endDate   DateTime? @map("end_date") @db.Date // окончание: первое число месяца; NULL — работает сейчас
+  sortOrder Int       @map("sort_order") // порядок показа: меньше — выше
 
-  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  achievements Achievement[]
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade) // связь с профилем: строка удаляется вместе с ним
+  achievements Achievement[] // достижения на этом месте
 
   @@index([profileId])
   @@map("experiences")
@@ -94,12 +94,12 @@ model Experience {
 
 /// Достижение на месте работы
 model Achievement {
-  id           Int    @id @default(autoincrement())
-  experienceId Int    @map("experience_id")
-  text         String
-  sortOrder    Int    @map("sort_order")
+  id           Int    @id @default(autoincrement()) // первичный ключ
+  experienceId Int    @map("experience_id") // место работы-владелец
+  text         String // текст достижения
+  sortOrder    Int    @map("sort_order") // порядок показа внутри места работы
 
-  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade) // связь с местом работы: строка удаляется вместе с ним
 
   @@index([experienceId])
   @@map("achievements")
@@ -107,14 +107,14 @@ model Achievement {
 
 /// Проект. Ссылки может не быть: исходники и сайты внутренних систем закрыты
 model Project {
-  id          Int     @id @default(autoincrement())
-  profileId   Int     @map("profile_id")
-  name        String
-  description String
-  url         String?
-  sortOrder   Int     @map("sort_order")
+  id          Int     @id @default(autoincrement()) // первичный ключ
+  profileId   Int     @map("profile_id") // профиль-владелец
+  name        String // название проекта
+  description String // что это за проект
+  url         String? // ссылка; NULL — публичной ссылки нет
+  sortOrder   Int     @map("sort_order") // порядок показа: меньше — выше
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade) // связь с профилем: строка удаляется вместе с ним
 
   @@index([profileId])
   @@map("projects")

@@ -6,8 +6,16 @@ import { ProjectsLoader } from './projects.loader.js';
 /** Поле Profile.projects объявляет модуль проектов, а не модуль профиля */
 @Resolver(() => Profile)
 export class ProjectsResolver {
-  constructor(private readonly projectsLoader: ProjectsLoader) {}
+  constructor(
+    private readonly projectsLoader: ProjectsLoader, // загрузчик проектов
+  ) {}
 
+  /**
+   * Поле Profile.projects.
+   * @param profile - профиль-родитель; нужен только его id
+   * @param context - контекст запроса GraphQL, передаётся в загрузчик
+   * @returns проекты в порядке показа
+   */
   @ResolveField(() => [Project], { description: 'Проекты в порядке показа' })
   async projects(
     @Parent() profile: Profile,

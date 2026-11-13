@@ -8,6 +8,12 @@ import { GraphQLScalarType } from 'graphql';
 export const DateScalar = new GraphQLScalarType<Date, string>({
   name: 'Date',
   description: 'Дата без времени в формате ГГГГ-ММ-ДД',
+  /**
+   * Превращает значение поля в строку ответа.
+   * @param value - значение из резолвера; ожидается Date (startDate и endDate места работы)
+   * @returns строка «ГГГГ-ММ-ДД» по UTC
+   * @throws TypeError, если пришёл не Date: это ошибка в коде резолвера, а не в данных
+   */
   serialize(value) {
     if (!(value instanceof Date)) {
       throw new TypeError('Скаляр Date ожидает объект Date');

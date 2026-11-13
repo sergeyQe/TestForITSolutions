@@ -10,12 +10,15 @@ import {
 /** Загрузчики мест работы и достижений: обращения за один шаг выполнения запроса уходят одной выборкой */
 @Injectable()
 export class ExperienceLoader {
-  private readonly byProfile: RequestLoaders<number, ExperienceData[]>;
+  private readonly byProfile: RequestLoaders<number, ExperienceData[]>; // места работы по id профиля
   private readonly achievementsByExperience: RequestLoaders<
     number,
     AchievementData[]
-  >;
+  >; // достижения по id места работы
 
+  /**
+   * @param experienceService - сервис опыта: загрузчики вызывают его пакетные методы
+   */
   constructor(experienceService: ExperienceService) {
     // Места работы всех запрошенных профилей — одной выборкой
     this.byProfile = new RequestLoaders(async (profileIds) => {
@@ -41,10 +44,22 @@ export class ExperienceLoader {
     );
   }
 
+  /**
+   * Места работы профиля; обращения за один шаг выполнения запроса уходят одной выборкой.
+   * @param context - контекст запроса GraphQL: по нему выбирается загрузчик этого запроса
+   * @param profileId - id профиля-родителя
+   * @returns места работы в порядке показа, уже со строкой периода; пустой список, если их нет
+   */
   loadByProfile(context: object, profileId: number): Promise<ExperienceData[]> {
     return this.byProfile.forRequest(context).load(profileId);
   }
 
+  /**
+   * Достижения места работы; обращения от всех мест работы одного запроса уходят одной выборкой.
+   * @param context - контекст запроса GraphQL: по нему выбирается загрузчик этого запроса
+   * @param experienceId - id места работы-родителя
+   * @returns достижения в порядке показа; пустой список, если достижений нет
+   */
   loadAchievements(
     context: object,
     experienceId: number,

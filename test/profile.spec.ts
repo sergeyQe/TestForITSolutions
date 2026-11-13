@@ -37,7 +37,10 @@ const LISTS_QUERY = `{
 
 const EXTRA_EXPERIENCES = 20;
 
-/** Меняет порядок показа всех списков на обратный, не трогая порядок строк в таблицах */
+/**
+ * Меняет порядок показа всех списков на обратный, не трогая порядок строк в таблицах.
+ * @param prisma - клиент тестового окружения
+ */
 async function reverseSortOrder(prisma: PrismaClient): Promise<void> {
   const reversed = { data: { sortOrder: { multiply: -1 } } };
   await prisma.$transaction([
@@ -49,7 +52,11 @@ async function reverseSortOrder(prisma: PrismaClient): Promise<void> {
   ]);
 }
 
-/** Добавляет профилю места работы — у каждого по два достижения */
+/**
+ * Добавляет профилю места работы — у каждого по два достижения.
+ * @param prisma - клиент тестового окружения
+ * @param count - сколько мест работы добавить
+ */
 async function addExperiences(
   prisma: PrismaClient,
   count: number,
@@ -77,6 +84,11 @@ async function addExperiences(
   });
 }
 
+/**
+ * Считает строки во всех шести таблицах визитки.
+ * @param prisma - клиент тестового окружения
+ * @returns число строк по таблицам — в том же виде, что expectedRowCounts
+ */
 async function countRows(
   prisma: PrismaClient,
 ): Promise<typeof expectedRowCounts> {

@@ -7,14 +7,19 @@ export class Profile {
   id: number;
 
   @Field({ description: 'Фамилия, имя и отчество' })
-  name: string;
+  name: string; // ФИО одной строкой
 
   @Field({
     description: 'Краткое описание: опыт, специализация, основной стек',
   })
-  description: string;
+  description: string; // текст «о себе»
 }
 
+/**
+ * Преобразует профиль из сервиса в модель GraphQL.
+ * @param profile - профиль из сервиса
+ * @returns модель для ответа; id сохраняется — по нему резолверы вложенных полей находят детей
+ */
 export function toProfileModel(profile: ProfileData): Profile {
   return {
     id: profile.id,

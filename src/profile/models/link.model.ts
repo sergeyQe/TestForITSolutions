@@ -18,15 +18,20 @@ registerEnumType(LinkType, {
 @ObjectType({ description: 'Ссылка на профессиональный ресурс или контакт' })
 export class Link {
   @Field(() => LinkType, { description: 'Вид ссылки' })
-  type: LinkType;
+  type: LinkType; // вид ресурса: перечисление из схемы базы
 
   @Field({ description: 'Подпись для показа' })
-  label: string;
+  label: string; // текст ссылки
 
   @Field({ description: 'Адрес: https://…, для почты — mailto:…' })
-  url: string;
+  url: string; // адрес перехода
 }
 
+/**
+ * Преобразует ссылку из сервиса в модель GraphQL; служебный profileId наружу не уходит.
+ * @param link - ссылка из сервиса
+ * @returns модель для ответа
+ */
 export function toLinkModel(link: LinkData): Link {
   return { type: link.type, label: link.label, url: link.url };
 }

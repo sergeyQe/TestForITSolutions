@@ -17,10 +17,18 @@ export class ProfileNotFoundError extends Error {
   }
 }
 
+/** Правила предметной области профиля: пустая база — это «профиль не найден» */
 @Injectable()
 export class ProfileService {
-  constructor(private readonly profileRepository: ProfileRepository) {}
+  constructor(
+    private readonly profileRepository: ProfileRepository, // запросы к таблицам профиля и ссылок
+  ) {}
 
+  /**
+   * Профиль визитки. Параметров нет: профиль в базе один.
+   * @returns профиль
+   * @throws ProfileNotFoundError, если база не заполнена
+   */
   async getProfile(): Promise<ProfileData> {
     const profile = await this.profileRepository.findFirst();
 
@@ -31,6 +39,11 @@ export class ProfileService {
     return profile;
   }
 
+  /**
+   * Пакетный метод для загрузчика ссылок.
+   * @param profileIds - id профилей, чьи ссылки нужны
+   * @returns ссылки всех этих профилей одним списком в порядке показа
+   */
   getLinks(profileIds: readonly number[]): Promise<LinkData[]> {
     return this.profileRepository.findLinksByProfileIds(profileIds);
   }

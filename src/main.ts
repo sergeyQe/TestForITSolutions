@@ -5,6 +5,13 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module.js';
 import type { Env } from './config/env.schema.js';
 
+/**
+ * Точка входа: создаёт приложение NestJS из AppModule и начинает слушать порт.
+ * Параметров нет — порт и адрес базы берутся из проверенных настроек окружения (env.schema.ts).
+ * @returns обещание: выполняется, когда сервер начал принимать запросы; отклоняется,
+ *   если база недоступна (ошибку ловит блок ниже). Неверные настройки окружения сюда
+ *   не доходят: NestJS сам пишет «Config validation error» и завершает процесс
+ */
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 

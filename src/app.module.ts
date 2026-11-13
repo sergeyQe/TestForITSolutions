@@ -12,6 +12,7 @@ import { ProfileModule } from './profile/profile.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { SkillsModule } from './skills/skills.module.js';
 
+/** Корневой модуль: настройки окружения, база, GraphQL и четыре модуля областей */
 @Module({
   imports: [
     // Настройки окружения: при ошибке в переменных приложение не стартует

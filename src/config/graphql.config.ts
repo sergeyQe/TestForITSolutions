@@ -15,6 +15,9 @@ const MAX_QUERY_TOKENS = 1000;
 /**
  * Непредвиденные ошибки (в том числе ошибки Prisma с текстом запроса) наружу не уходят:
  * клиент получает общее сообщение, подробности остаются в журнале.
+ * @param formattedError - ошибка в том виде, в каком Apollo собирался отдать её клиенту
+ * @param error - исходная ошибка (обёртка над брошенной в резолвере); нужна только для журнала
+ * @returns ошибка для ответа: без изменений, BAD_REQUEST или обезличенная INTERNAL_SERVER_ERROR
  */
 function formatError(
   formattedError: GraphQLFormattedError,
@@ -45,6 +48,12 @@ function formatError(
   };
 }
 
+/**
+ * Настройки GraphQL: схема из кода, Apollo Sandbox, потолок размера запроса, формат ошибок.
+ * Вызывается фабрикой GraphQLModule.forRootAsync в AppModule.
+ * @param config - проверенные настройки окружения; читается только NODE_ENV
+ * @returns настройки драйвера Apollo
+ */
 export function createGraphqlOptions(
   config: ConfigService<Env, true>,
 ): ApolloDriverConfig {

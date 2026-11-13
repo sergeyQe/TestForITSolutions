@@ -15,13 +15,21 @@ const MAX_BATCH_SIZE = 10_000;
  * запрос, а WeakMap отпускает загрузчик вместе с ним.
  */
 export class RequestLoaders<Key, Value> {
-  private readonly loaders = new WeakMap<object, DataLoader<Key, Value>>();
+  private readonly loaders = new WeakMap<object, DataLoader<Key, Value>>(); // загрузчик на каждый контекст запроса
 
+  /**
+   * @param loadBatch - пакетная функция: получает ключи одного пакета и возвращает значения
+   *   в том же порядке и той же длины (обычно это пакетный метод сервиса + groupByKey)
+   */
   constructor(
-    private readonly loadBatch: (keys: readonly Key[]) => Promise<Value[]>,
+    private readonly loadBatch: (keys: readonly Key[]) => Promise<Value[]>, // пакетная функция загрузки
   ) {}
 
-  /** Загрузчик запроса, которому принадлежит контекст */
+  /**
+   * Загрузчик запроса, которому принадлежит контекст.
+   * @param context - объект контекста GraphQL (`@Context()` в резолвере): свой на каждый запрос
+   * @returns DataLoader этого запроса; повторный вызов с тем же контекстом вернёт тот же экземпляр
+   */
   forRequest(context: object): DataLoader<Key, Value> {
     // Первое обращение в рамках запроса создаёт загрузчик, следующие получают его же
     let loader = this.loaders.get(context);

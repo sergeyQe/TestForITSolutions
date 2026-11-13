@@ -11,10 +11,20 @@ import { Profile, toProfileModel } from './models/profile.model.js';
 import { ProfileLoader } from './profile.loader.js';
 import { ProfileNotFoundError } from './profile.service.js';
 
+/** Корневой запрос profile и поле Profile.links */
 @Resolver(() => Profile)
 export class ProfileResolver {
-  constructor(private readonly profileLoader: ProfileLoader) {}
+  constructor(
+    private readonly profileLoader: ProfileLoader, // загрузчики профиля и ссылок
+  ) {}
 
+  /**
+   * Корневой запрос profile — единственная точка входа в граф.
+   * @param context - контекст запроса GraphQL, передаётся в загрузчик
+   * @returns модель профиля; вложенные поля (links, skills, experience, projects)
+   *   досчитывают резолверы своих модулей
+   * @throws GraphQLError с кодом NOT_FOUND, если база не заполнена
+   */
   @Query(() => Profile, {
     description:
       'Профиль специалиста — корень визитки. Если база не заполнена, вернётся ошибка с кодом NOT_FOUND',
@@ -33,6 +43,12 @@ export class ProfileResolver {
     }
   }
 
+  /**
+   * Поле Profile.links.
+   * @param profile - профиль-родитель; нужен только его id
+   * @param context - контекст запроса GraphQL, передаётся в загрузчик
+   * @returns ссылки в порядке показа
+   */
   @ResolveField(() => [Link], {
     description: 'Ссылки на профессиональные ресурсы и контакты',
   })

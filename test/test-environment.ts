@@ -6,6 +6,7 @@ import request from 'supertest';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 
+/** Итог одного запроса GraphQL в тесте */
 export type QueryResult = {
   /** Тело ответа GraphQL */
   body: unknown;
@@ -13,17 +14,21 @@ export type QueryResult = {
   databaseQueries: number;
 };
 
+/** Запущенное тестовое окружение: база в контейнере и приложение целиком */
 export type TestEnvironment = {
   /** Отдельный клиент для подготовки данных: его запросы в счёт не попадают */
   prisma: PrismaClient;
   /** Выполняет запрос GraphQL по HTTP — тем же путём, что Apollo Sandbox */
   execute(query: string): Promise<QueryResult>;
+  /** Останавливает приложение, отключает клиент и удаляет контейнер с базой */
   stop(): Promise<void>;
 };
 
 /**
  * Поднимает всё, что нужно тестам: PostgreSQL в контейнере, схему из миграций и само приложение.
- * От локальной базы разработчика тесты не зависят.
+ * От локальной базы разработчика тесты не зависят. Параметров нет.
+ * @returns окружение: клиент для подготовки данных, `execute(query)` — выполнить запрос GraphQL
+ *   и узнать число SQL-запросов, `stop()` — всё остановить
  */
 export async function startTestEnvironment(): Promise<TestEnvironment> {
   // Настоящая PostgreSQL той же версии, что в docker-compose
@@ -65,6 +70,11 @@ export async function startTestEnvironment(): Promise<TestEnvironment> {
   return {
     prisma,
 
+    /**
+     * Выполняет запрос GraphQL по HTTP и считает SQL-запросы приложения за это время.
+     * @param query - текст запроса GraphQL
+     * @returns тело ответа и число SQL-запросов; ответ с ошибками проваливает тест
+     */
     async execute(query) {
       databaseQueries = 0;
       const response = await request(app.getHttpServer())
@@ -78,6 +88,7 @@ export async function startTestEnvironment(): Promise<TestEnvironment> {
       return { body, databaseQueries };
     },
 
+    /** Останавливает по очереди: приложение, клиент подготовки данных, контейнер с базой */
     async stop() {
       await app.close();
       await prisma.$disconnect();

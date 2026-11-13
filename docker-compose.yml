@@ -51,6 +51,12 @@ services:
       context: .
       target: runtime
     restart: unless-stopped
+    # Приложению не нужны ни запись на диск, ни привилегии: при взломе у атакующего их тоже не будет
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       PORT: 3000
       DATABASE_URL: *database-url

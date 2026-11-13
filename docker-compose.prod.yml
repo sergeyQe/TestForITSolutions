@@ -1,15 +1,40 @@
 # Дополнение для сервера: HTTPS через Caddy, наружу открыты только порты 80 и 443.
 # Запуск: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 # Нужен Docker Compose 2.24 или новее (тег !reset)
+
+# Журнал каждого контейнера — не больше 30 МБ: поток запросов не заполнит диск сервера
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
 services:
+  postgres:
+    logging: *logging
+    environment:
+      # На сервере учебный пароль по умолчанию не годится: без переменной запуск остановится
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env — пароль базы из букв и цифр}
+
   app:
+    logging: *logging
     # Порт приложения наружу не публикуется: к нему обращается только Caddy по внутренней сети
     ports: !reset []
+    # Предел памяти: под потоком тяжёлых запросов перезапустится только приложение, а не база и сервер
+    mem_limit: 512m
 
   # Веб-сервер: сам получает и продлевает сертификат для домена из SITE_ADDRESS
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    logging: *logging
+    # Из привилегий оставлена одна — занять порты 80 и 443
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?задайте SITE_ADDRESS в .env — домен сайта, например card.example.com}
     ports:

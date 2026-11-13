@@ -2,5 +2,20 @@
 # Caddy сам получает сертификат Let's Encrypt и перенаправляет HTTP на HTTPS.
 {$SITE_ADDRESS} {
 	encode zstd gzip
+
+	header {
+		# Год браузер ходит на сайт только по HTTPS, даже по старой ссылке с http://
+		Strict-Transport-Security "max-age=31536000"
+		# Браузер не угадывает тип содержимого, а верит заголовку Content-Type
+		X-Content-Type-Options "nosniff"
+		# Страницу нельзя встроить во фрейм на чужом сайте; на Sandbox внутри нашей страницы не влияет
+		Content-Security-Policy "frame-ancestors 'none'"
+		# Адрес страницы не передаётся сайтам, на которые ведут ссылки
+		Referrer-Policy "no-referrer"
+		# Ответы не сообщают, какой веб-сервер стоит перед приложением
+		-Server
+		-Via
+	}
+
 	reverse_proxy app:3000
 }

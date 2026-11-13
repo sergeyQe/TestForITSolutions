@@ -1,0 +1,121 @@
+// Схема базы данных визитки. Адрес базы задаётся в prisma.config.ts, а не здесь.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Вид ссылки в профиле
+enum LinkType {
+  GITHUB
+  TELEGRAM
+  EMAIL
+  HH
+  LINKEDIN
+
+  @@map("link_type")
+}
+
+/// Категория навыка
+enum SkillCategory {
+  LANGUAGES
+  BACKEND
+  DATA
+  ARCHITECTURE
+  DEVOPS
+  TESTING
+
+  @@map("skill_category")
+}
+
+/// Профиль специалиста. В базе один: это гарантирует seed
+model Profile {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+
+  links       Link[]
+  skills      Skill[]
+  experiences Experience[]
+  projects    Project[]
+
+  @@map("profiles")
+}
+
+/// Ссылка на профессиональный ресурс
+model Link {
+  id        Int      @id @default(autoincrement())
+  profileId Int      @map("profile_id")
+  type      LinkType
+  label     String
+  url       String
+  sortOrder Int      @map("sort_order")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("links")
+}
+
+/// Навык
+model Skill {
+  id        Int           @id @default(autoincrement())
+  profileId Int           @map("profile_id")
+  name      String
+  category  SkillCategory
+  sortOrder Int           @map("sort_order")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("skills")
+}
+
+/// Место работы. Даты — без времени, хранится первое число месяца; endDate = NULL — работает по настоящее время
+model Experience {
+  id        Int       @id @default(autoincrement())
+  profileId Int       @map("profile_id")
+  company   String
+  position  String
+  startDate DateTime  @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+  sortOrder Int       @map("sort_order")
+
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  achievements Achievement[]
+
+  @@index([profileId])
+  @@map("experiences")
+}
+
+/// Достижение на месте работы
+model Achievement {
+  id           Int    @id @default(autoincrement())
+  experienceId Int    @map("experience_id")
+  text         String
+  sortOrder    Int    @map("sort_order")
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@index([experienceId])
+  @@map("achievements")
+}
+
+/// Проект. Ссылки может не быть: исходники и сайты внутренних систем закрыты
+model Project {
+  id          Int     @id @default(autoincrement())
+  profileId   Int     @map("profile_id")
+  name        String
+  description String
+  url         String?
+  sortOrder   Int     @map("sort_order")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("projects")
+}

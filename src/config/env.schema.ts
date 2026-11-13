@@ -11,6 +11,8 @@ export const envSchema = z.object({
     error:
       'ожидается строка подключения вида postgresql://user:pass@host:5432/db',
   }),
+  // Писать ли SQL-запросы в журнал: по ним видно число обращений к базе на один запрос GraphQL
+  LOG_QUERIES: z.stringbool().default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;

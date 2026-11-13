@@ -1,0 +1,24 @@
+import { Field, ObjectType } from '@nestjs/graphql';
+import type { ProfileData } from '../profile.service.js';
+
+@ObjectType({ description: 'Профиль специалиста' })
+export class Profile {
+  /** Нужен резолверам вложенных полей, в схему GraphQL не входит */
+  id: number;
+
+  @Field({ description: 'Фамилия, имя и отчество' })
+  name: string;
+
+  @Field({
+    description: 'Краткое описание: опыт, специализация, основной стек',
+  })
+  description: string;
+}
+
+export function toProfileModel(profile: ProfileData): Profile {
+  return {
+    id: profile.id,
+    name: profile.name,
+    description: profile.description,
+  };
+}

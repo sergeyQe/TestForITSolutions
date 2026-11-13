@@ -9,6 +9,8 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import type { Env } from '../config/env.schema.js';
 import { PrismaClient } from '../generated/prisma/client.js';
 
+const DATABASE_TIMEOUT_MS = 5_000;
+
 /** Настройки клиента: события о запросах нужны для журнала и для подсчёта запросов в тестах */
 type PrismaServiceOptions = {
   adapter: PrismaPg;
@@ -25,8 +27,11 @@ export class PrismaService
 
   constructor(config: ConfigService<Env, true>) {
     super({
+      // Пределы ожидания: зависшая база даёт ошибку (и 503 на /health), а не бесконечное ожидание
       adapter: new PrismaPg({
         connectionString: config.get('DATABASE_URL', { infer: true }),
+        connectionTimeoutMillis: DATABASE_TIMEOUT_MS,
+        query_timeout: DATABASE_TIMEOUT_MS,
       }),
       log: [{ emit: 'event', level: 'query' }],
     });

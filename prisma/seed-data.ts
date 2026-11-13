@@ -26,6 +26,11 @@ export const seedData: SeedData = {
       label: 'Почта',
       url: 'mailto:sergey_aleksandrovichiiii@bk.ru',
     },
+    {
+      type: 'HH',
+      label: 'hh.ru',
+      url: 'https://hh.ru/resume/f95bb55fff115d691a0039ed1f4f7434645539',
+    },
   ],
 
   skills: [

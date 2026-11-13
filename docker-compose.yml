@@ -1,9 +1,17 @@
 name: digital-business-card
 
+# Запуск с нуля одной командой: docker compose up --build
+# Порядок: postgres (готова) → migrate (миграции и данные, завершается) → app
+
+# Адрес базы внутри сети compose: один на migrate и app, из тех же переменных, что и настройки контейнера postgres.
+# Поле с префиксом x- compose пропускает; &database-url — якорь YAML, ниже значение подставляется как *database-url
+x-database-url: &database-url postgresql://${POSTGRES_USER:-card}:${POSTGRES_PASSWORD:-card}@postgres:5432/${POSTGRES_DB:-card}
+
 services:
   # База данных. Порт наружу не публикуется: для локальной разработки его открывает docker-compose.dev.yml
   postgres:
     image: postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-card}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-card}
@@ -20,6 +28,54 @@ services:
       retries: 10
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+  # Одноразовый контейнер: применяет миграции и приводит данные визитки к содержимому prisma/seed-data.ts.
+  # Отдельно от приложения: упавшая миграция не даёт приложению стартовать, а не роняет его в цикле перезапусков
+  migrate:
+    build:
+      context: .
+      target: build
+    restart: 'no'
+    environment:
+      DATABASE_URL: *database-url
+      # Без проверки новых версий Prisma: одноразовому контейнеру не нужен запрос наружу и совет обновиться в журнале
+      CHECKPOINT_DISABLE: 1
+    command: ['sh', '-c', 'npx prisma migrate deploy && npx prisma db seed']
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Приложение: GraphQL API и Apollo Sandbox на /graphql. NODE_ENV=production задан в самом образе (Dockerfile)
+  app:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DATABASE_URL: *database-url
+      # SQL-запросы в журнале: `docker compose logs app` показывает, сколько обращений к базе делает запрос GraphQL
+      LOG_QUERIES: ${LOG_QUERIES:-true}
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    healthcheck:
+      # Средствами Node: curl в лёгком образе нет
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   postgres-data:

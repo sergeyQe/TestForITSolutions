@@ -1,0 +1,6 @@
+# Домен берётся из переменной SITE_ADDRESS (.env на сервере).
+# Caddy сам получает сертификат Let's Encrypt и перенаправляет HTTP на HTTPS.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

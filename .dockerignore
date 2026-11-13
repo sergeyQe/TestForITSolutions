@@ -1,0 +1,20 @@
+# Всё это либо собирается внутри образа, либо в образе не нужно
+node_modules
+dist
+src/generated
+coverage
+*.tsbuildinfo
+*.log
+
+# Скрытые файлы и папки сборке не нужны: .git, .idea, настройки линтера и форматирования.
+# Сюда же попадает .env: секреты и локальные настройки в образ не запекаются
+.*
+
+# Тесты, сохранённая схема GraphQL, документация и файлы Docker на сборку не влияют
+test
+vitest.config*.ts
+schema.gql
+*.md
+Dockerfile
+docker-compose*.yml
+Caddyfile

@@ -1,0 +1,29 @@
+# Дополнение для сервера: HTTPS через Caddy, наружу открыты только порты 80 и 443.
+# Запуск: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Нужен Docker Compose 2.24 или новее (тег !reset)
+services:
+  app:
+    # Порт приложения наружу не публикуется: к нему обращается только Caddy по внутренней сети
+    ports: !reset []
+
+  # Веб-сервер: сам получает и продлевает сертификат для домена из SITE_ADDRESS
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?задайте SITE_ADDRESS в .env — домен сайта, например card.example.com}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Сертификаты хранятся в томе: при пересоздании контейнера они не запрашиваются заново
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -3,6 +3,8 @@
 Backend-приложение, которое представляет меня как специалиста: профиль, навыки, опыт работы с достижениями и проекты.
 Данные отдаёт GraphQL API, интерфейс — **Apollo Sandbox** на `/graphql`.
 
+**Развёрнутая визитка:** <https://109-120-147-30.sslip.io:8443/graphql> — в Apollo Sandbox уже подставлен полный запрос, достаточно нажать **Run**.
+
 Стек из задания: **Git · TypeScript · Node.js · NestJS · Prisma · GraphQL · Docker** (плюс PostgreSQL).
 
 - API только на чтение: один корневой запрос `profile`, мутаций и авторизации нет.
@@ -354,6 +356,12 @@ npm test
 Число запросов считается по событиям `query` клиента Prisma. Каждый тест проверен порчей кода: без сортировки, без пакетной загрузки, с форматированием в местном поясе, с seed без удаления — соответствующий тест падает.
 
 ## Деплой
+
+Развёрнутый экземпляр: <https://109-120-147-30.sslip.io:8443/graphql>. Порт 8443 в адресе — потому что порт 443 на этом сервере занят другой службой. Проверка без браузера:
+
+```bash
+curl -s https://109-120-147-30.sslip.io:8443/graphql -H "content-type: application/json" -d '{"query":"{ profile { name description skills { name } experience { company position } projects { name } } }"}'
+```
 
 Сервер — VPS с Docker. Используется тот же `docker-compose.yml`, что и локально, плюс дополнение [`docker-compose.prod.yml`](docker-compose.prod.yml): контейнер **Caddy** получает сертификат и принимает HTTPS, порт приложения наружу не публикуется.
 

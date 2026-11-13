@@ -3,6 +3,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 const projectSelect = {
+  profileId: true,
   name: true,
   description: true,
   url: true,
@@ -17,9 +18,10 @@ export type ProjectRecord = Prisma.ProjectGetPayload<{
 export class ProjectsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByProfileId(profileId: number): Promise<ProjectRecord[]> {
+  /** Пакетная выборка: один запрос на любое число профилей */
+  findByProfileIds(profileIds: readonly number[]): Promise<ProjectRecord[]> {
     return this.prisma.project.findMany({
-      where: { profileId },
+      where: { profileId: { in: [...profileIds] } },
       orderBy: { sortOrder: 'asc' },
       select: projectSelect,
     });

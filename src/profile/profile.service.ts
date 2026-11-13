@@ -31,7 +31,7 @@ export class ProfileService {
     return profile;
   }
 
-  getLinks(profileId: number): Promise<LinkData[]> {
-    return this.profileRepository.findLinksByProfileId(profileId);
+  getLinks(profileIds: readonly number[]): Promise<LinkData[]> {
+    return this.profileRepository.findLinksByProfileIds(profileIds);
   }
 }

@@ -8,7 +8,7 @@ export type SkillData = SkillRecord;
 export class SkillsService {
   constructor(private readonly skillsRepository: SkillsRepository) {}
 
-  getByProfile(profileId: number): Promise<SkillData[]> {
-    return this.skillsRepository.findByProfileId(profileId);
+  getByProfiles(profileIds: readonly number[]): Promise<SkillData[]> {
+    return this.skillsRepository.findByProfileIds(profileIds);
   }
 }

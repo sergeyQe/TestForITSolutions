@@ -29,9 +29,11 @@ function formatPeriod(startDate: Date, endDate: Date | null): string {
 export class ExperienceService {
   constructor(private readonly experienceRepository: ExperienceRepository) {}
 
-  async getByProfile(profileId: number): Promise<ExperienceData[]> {
+  async getByProfiles(
+    profileIds: readonly number[],
+  ): Promise<ExperienceData[]> {
     const experiences =
-      await this.experienceRepository.findByProfileId(profileId);
+      await this.experienceRepository.findByProfileIds(profileIds);
 
     // Строка периода — правило предметной области, поэтому считается здесь, а не в резолвере
     return experiences.map((experience) => ({
@@ -40,9 +42,11 @@ export class ExperienceService {
     }));
   }
 
-  getAchievements(experienceId: number): Promise<AchievementData[]> {
-    return this.experienceRepository.findAchievementsByExperienceId(
-      experienceId,
+  getAchievements(
+    experienceIds: readonly number[],
+  ): Promise<AchievementData[]> {
+    return this.experienceRepository.findAchievementsByExperienceIds(
+      experienceIds,
     );
   }
 }

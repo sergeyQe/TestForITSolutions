@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ExperienceLoader } from './experience.loader.js';
 import { ExperienceRepository } from './experience.repository.js';
 import {
   ExperienceResolver,
@@ -11,6 +12,7 @@ import { ExperienceService } from './experience.service.js';
   providers: [
     ProfileExperienceResolver,
     ExperienceResolver,
+    ExperienceLoader,
     ExperienceService,
     ExperienceRepository,
   ],

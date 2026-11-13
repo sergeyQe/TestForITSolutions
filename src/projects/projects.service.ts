@@ -11,7 +11,7 @@ export type ProjectData = ProjectRecord;
 export class ProjectsService {
   constructor(private readonly projectsRepository: ProjectsRepository) {}
 
-  getByProfile(profileId: number): Promise<ProjectData[]> {
-    return this.projectsRepository.findByProfileId(profileId);
+  getByProfiles(profileIds: readonly number[]): Promise<ProjectData[]> {
+    return this.projectsRepository.findByProfileIds(profileIds);
   }
 }

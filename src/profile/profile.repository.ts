@@ -9,6 +9,7 @@ const profileSelect = {
 } satisfies Prisma.ProfileSelect;
 
 const linkSelect = {
+  profileId: true,
   type: true,
   label: true,
   url: true,
@@ -32,9 +33,10 @@ export class ProfileRepository {
     });
   }
 
-  findLinksByProfileId(profileId: number): Promise<LinkRecord[]> {
+  /** Пакетная выборка: один запрос на любое число профилей */
+  findLinksByProfileIds(profileIds: readonly number[]): Promise<LinkRecord[]> {
     return this.prisma.link.findMany({
-      where: { profileId },
+      where: { profileId: { in: [...profileIds] } },
       orderBy: { sortOrder: 'asc' },
       select: linkSelect,
     });

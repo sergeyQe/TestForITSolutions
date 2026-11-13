@@ -3,6 +3,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 const skillSelect = {
+  profileId: true,
   name: true,
   category: true,
 } satisfies Prisma.SkillSelect;
@@ -16,9 +17,10 @@ export type SkillRecord = Prisma.SkillGetPayload<{
 export class SkillsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByProfileId(profileId: number): Promise<SkillRecord[]> {
+  /** Пакетная выборка: один запрос на любое число профилей */
+  findByProfileIds(profileIds: readonly number[]): Promise<SkillRecord[]> {
     return this.prisma.skill.findMany({
-      where: { profileId },
+      where: { profileId: { in: [...profileIds] } },
       orderBy: { sortOrder: 'asc' },
       select: skillSelect,
     });

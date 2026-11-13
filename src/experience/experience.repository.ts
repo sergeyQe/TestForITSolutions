@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 
 const experienceSelect = {
   id: true,
+  profileId: true,
   company: true,
   position: true,
   startDate: true,
@@ -11,6 +12,7 @@ const experienceSelect = {
 } satisfies Prisma.ExperienceSelect;
 
 const achievementSelect = {
+  experienceId: true,
   text: true,
 } satisfies Prisma.AchievementSelect;
 
@@ -26,19 +28,21 @@ export type AchievementRecord = Prisma.AchievementGetPayload<{
 export class ExperienceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByProfileId(profileId: number): Promise<ExperienceRecord[]> {
+  /** Пакетная выборка: один запрос на любое число профилей */
+  findByProfileIds(profileIds: readonly number[]): Promise<ExperienceRecord[]> {
     return this.prisma.experience.findMany({
-      where: { profileId },
+      where: { profileId: { in: [...profileIds] } },
       orderBy: { sortOrder: 'asc' },
       select: experienceSelect,
     });
   }
 
-  findAchievementsByExperienceId(
-    experienceId: number,
+  /** Пакетная выборка: один запрос на любое число мест работы вместо запроса на каждое (N+1) */
+  findAchievementsByExperienceIds(
+    experienceIds: readonly number[],
   ): Promise<AchievementRecord[]> {
     return this.prisma.achievement.findMany({
-      where: { experienceId },
+      where: { experienceId: { in: [...experienceIds] } },
       orderBy: { sortOrder: 'asc' },
       select: achievementSelect,
     });

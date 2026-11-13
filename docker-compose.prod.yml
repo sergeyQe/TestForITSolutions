@@ -37,9 +37,12 @@ services:
       - no-new-privileges:true
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?задайте SITE_ADDRESS в .env — домен сайта, например card.example.com}
+      # Порт HTTPS: 443, если он свободен; иначе другой — тогда он входит в адрес сайта (https://домен:8443)
+      HTTPS_PORT: ${HTTPS_PORT:-443}
     ports:
+      # Порт 80 нужен всегда: через него выдаётся сертификат и идёт перенаправление на HTTPS
       - '80:80'
-      - '443:443'
+      - '${HTTPS_PORT:-443}:${HTTPS_PORT:-443}'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Сертификаты хранятся в томе: при пересоздании контейнера они не запрашиваются заново

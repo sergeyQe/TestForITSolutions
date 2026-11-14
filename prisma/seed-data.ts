@@ -118,7 +118,8 @@ export const seedData: SeedData = {
     },
     {
       name: 'Цифровая визитка',
-      description: 'Это приложение: NestJS, GraphQL, Prisma, Docker',
+      description:
+        'Это приложение: NestJS, GraphQL, Prisma, Docker. Поля схемы сверх примера из задания добавлены намеренно, обоснование — в README',
       url: 'https://github.com/sergeyQe/TestForITSolutions',
     },
     {
